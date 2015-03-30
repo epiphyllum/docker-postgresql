@@ -1,0 +1,71 @@
+#!/bin/bash
+
+######################################################################
+# common
+IP=172.17.77.3
+MASK=24
+GATEWAY=172.17.42.1
+VERSION=9.4
+
+# database
+DB_USER=postgresql
+DB_PASS=postgresql
+DB_NAME=gitlabhq_production
+
+# data
+VOLUME_DATA=$HOME/appstore/tfs/pgsql/data
+######################################################################
+
+
+VERSION=${VERSION:-"latest"};
+
+if [ $# -lt 1 ]; then
+    Usage;
+fi
+
+
+# 从容器启动
+function start_docker {
+    echo "start docker[tfs-postgresql]...";
+    sudo docker start tfs-postgresql;
+    sudo pipework docker0 tfs-postgresql $IP/$MASK@$GATEWAY
+    echo "IP address is[$IP/$MASK] and gateway[$GATEWAY]"
+}
+
+# 停止容器
+function stop_docker {
+    sudo docker stop tfs-postgresql;
+}
+
+# 创建容器+初始化+启动
+function run_docker {
+    echo "run docker using image[hary/postgresql] version[$VERSION]";
+    sudo docker run -i -t -d --name tfs-postgresql --hostname tfs-postgresql \
+    -e "DB_USER=$DB_USER" \
+    -e "DB_PASS=$DB_PASS" \
+    -e "DB_NAME=$DB_NAME" \
+    -v $VOLUME_DATA:/var/lib/postgresql \
+    hary/postgresql:$VERSION
+
+    # 设置IP地址
+    sudo pipework docker0 tfs-postgresql $IP/$MASK@$GATEWAY;
+    echo "IP address is[$IP/$MASK] and gateway[$GATEWAY]"
+}
+
+#####################################################################################
+# main
+#####################################################################################
+case $1 in
+   # create container and initialize it and running
+   run) run_docker;;
+
+   # docker start
+   start) start_docker;;
+
+   # docker stop_docker
+   stop) stop_docker;;
+
+   # clean volume data
+   clean) sudo rm -fr $VOLUME_DATA/*;;
+esac
+
