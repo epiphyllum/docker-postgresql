@@ -20,7 +20,8 @@ VOLUME_DATA=$HOME/appstore/tfs/pgsql/data
 VERSION=${VERSION:-"latest"};
 
 if [ $# -lt 1 ]; then
-    Usage;
+    echo "Usage: tfs-postgresql run|start|stop|clean";
+    exit 0;
 fi
 
 
