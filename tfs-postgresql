@@ -13,7 +13,7 @@ DB_PASS=postgresql
 DB_NAME=gitlabhq_production
 
 # data
-VOLUME_DATA=$HOME/appstore/tfs/pgsql/data
+VOLUME_DATA=$HOME/appstore/tfs/postgresql/data
 ######################################################################
 
 
